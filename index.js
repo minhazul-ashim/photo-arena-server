@@ -69,6 +69,40 @@ async function run() {
 
             res.json(result)
         })
+
+        //API for posting a user's art collection;
+        app.put('/user/art', async (req, res) => {
+
+            const email = req.query.email;
+            const data = req.body;
+            const filter = { email: email }
+
+            const result = await users.updateOne(filter, {
+                $addToSet: { artCollections: data }
+            })
+            res.json(result)
+        })
+
+        //API for posting a user's photo collection;
+        app.put('/user/photo', async (req, res) => {
+
+            const email = req.query.email;
+            const data = req.body;
+            const filter = { email: email }
+
+            const result = await users.updateOne(filter, {
+                $addToSet: { photoCollections: data }
+            })
+            res.json(result)
+        })
+
+        //API for retrieving a user's photo collection;
+        app.get('/user/photos', async (req, res) => {
+
+            const email = req.query.email;
+            const result = await users.findOne({ email: email })
+            res.json(result)
+        })
     }
 
     finally {
