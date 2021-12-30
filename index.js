@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient } = require('mongodb');
-const { config } = require('dotenv');
 const ObjectId = require('mongodb').ObjectId;
 require('dotenv').config();
 
@@ -9,7 +8,7 @@ const port = process.env.PORT || 5000;
 const app = express();
 
 //Middlewares
-app.use(express.json())
+app.use(express.json());
 app.use(cors());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ptzya.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
@@ -26,7 +25,7 @@ admin.initializeApp({
 
 //Function for verifying the id token;
 
-async function verfyToken(req, res, next) {
+async function verifyToken(req, res, next) {
 
     if (req.headers?.authorization) {
 
@@ -124,7 +123,7 @@ async function run() {
         })
 
         //API for retrieving a user's photo collection;
-        app.get('/user/photos', verfyToken, async (req, res) => {
+        app.get('/user/photos', verifyToken, async (req, res) => {
 
             const email = req.query.email;
             if (email === req.decodedEmail) {
@@ -132,8 +131,35 @@ async function run() {
                 res.json(result)
             }
             else {
-                res.status(401).json({message: 'Unauthorized'})
+                res.status(401).json({ message: 'Unauthorized' })
             }
+        })
+
+        //API for deleting a photo from user's end;
+        app.delete('/user/photos', async (req, res) => {
+
+            const email = req.query.email;
+            const data = req.body;
+            const filter = { email: email }
+
+            const result = await users.updateOne(filter, {
+                $pull: { photoCollections: data }
+            })
+            res.json(result)
+        })
+
+        //API for deleting a art from user's collection;
+
+        app.delete('/user/arts', async (req, res) => {
+
+            const email = req.query.email;
+            const data = req.body;
+
+            const filter = { email: email };
+            const result = await users.updateOne(filter, {
+                $pull: { artCollections: data }
+            })
+            res.json(result)
         })
     }
 
